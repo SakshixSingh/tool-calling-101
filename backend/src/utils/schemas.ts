@@ -71,7 +71,7 @@ export const summarizeOutputSchema=z.object({
 //search input schema
 
 export const searchInputSchema=z.object({
-    q:z.string().min(2,'Please ask a specific query');
+    q:z.string().min(2,'Please ask a specific query')
 
 })
 
