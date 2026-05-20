@@ -27,6 +27,8 @@ import { OpenUrlOutputSchema } from './schemas';
 
 //we fetch the url and stripe all the unneceassry infos and keep the exact articlle like content that we need
 
+// next file - summarize.ts
+
 export async function openurl(url:string){
        //step 1 : normalize  the url 
        const normalize=validateUrls(url);

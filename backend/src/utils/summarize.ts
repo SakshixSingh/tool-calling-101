@@ -1,3 +1,11 @@
+
+
+//after getting the output from openUrl logic - the file is converted from html to text 
+// now we can use this text and send it to the summarize logic to get a concise summary of the content. 
+// This is useful for the agent to quickly understand the main points of the content without having to read 
+// through all the details.
+
+
 import { get } from "node:http";
 import { summarizeInputSchema, summarizeOutputSchema } from "./schemas";
 import { getModel } from "../shared/models";
