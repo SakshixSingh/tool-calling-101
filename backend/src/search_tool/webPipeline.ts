@@ -122,7 +122,7 @@ export const composeStep=RunnableLambda.from(
                         "Rules :",
                         "Be accurate and neutral",
                         "5-8 sentences max",
-                        "Use only provided summaried . Dont invent new facts"
+                        "Use only provided summaries. Dont invent new facts"
                     ].join('\n')
                 ),
                 new HumanMessage(

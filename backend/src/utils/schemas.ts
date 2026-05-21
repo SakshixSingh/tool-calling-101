@@ -76,3 +76,13 @@ export const searchInputSchema=z.object({
 })
 
 export type SearchInput=z.infer<typeof searchInputSchema>
+
+
+//search output schema
+
+export const searchOutputSchema=z.object({
+    answer:z.string().min(1),
+    source:z.array(z.url()).default([])
+})
+
+export type SearchOutput=z.infer<typeof searchOutputSchema>
