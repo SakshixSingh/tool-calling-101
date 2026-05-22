@@ -1,7 +1,7 @@
 //this file conatins the logic whether the LLM will go for direct path or web search path
 
 import { RunnableLambda } from "@langchain/core/runnables";
-import { searchInputSchema } from "../utils/schemas";
+import { searchInputSchema, SearchInput } from "../utils/schemas";
 
 export function routeStrategy(q:string): "web" | "direct"{
       const trimedQuery = q.trim().toLowerCase();
@@ -47,13 +47,13 @@ export function routeStrategy(q:string): "web" | "direct"{
 
 //router step
 
-export const routerStep = RunnableLambda.from(async (input:string)=>{
-    const {q} = searchInputSchema.parse(input)
+export const routerStep = RunnableLambda.from(async (input: SearchInput) => {
+  const { q } = searchInputSchema.parse(input)
 
     //decide the path based on the query
-    const mode=routeStrategy(q);
+    const mode = routeStrategy(q);
     return {
-        q,
-        mode
+      q,
+      mode,
     };
-})
+  });

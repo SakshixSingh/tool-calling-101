@@ -38,7 +38,10 @@ export async function summarize(text:string){
         ].join(" "))
      ])
 
-     const rawmodeloutput= typeof response === "string" ? response : response?.text ?? ""
+     const rawmodeloutput =
+        typeof response === "string"
+            ? response
+            : String(response.content ?? "");
 
      const summary = normalizeSummary(rawmodeloutput)
 

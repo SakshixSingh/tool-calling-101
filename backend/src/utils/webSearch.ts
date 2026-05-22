@@ -4,7 +4,7 @@
 
 
 import {env} from "../shared/env"
-import { WebSearchResultsSchema } from "./schemas"
+import { WebSearchResultSchema, WebSearchResultsSchema } from "./schemas"
 
 export async function webSearch(q:string){
     const query=(q?? '').trim()
@@ -42,7 +42,7 @@ async function searchTavilyUtil(query:string){
     const results = Array.isArray(data?.results) ? data.results : []
 
     const normalized = results.slice(0, 5).map((r: any) =>
-        WebSearchResultsSchema.parse({
+        WebSearchResultSchema.parse({
             title: String(r?.title ?? "").trim() || "Untitled",
             url: String(r?.url ?? "").trim(),
             snippet: String(r?.content ?? "").trim().slice(0, 220)

@@ -7,31 +7,37 @@ import { Candidate } from "./type";
 import { getModel } from "../shared/models";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 
-export const finalValidateAndPolish =RunnableLambda.from(
-    async (candidate : Candidate) =>{
-        const finalDraft= {
-            answer:candidate.answer,
-            sources:candidate.source?? []
+export const finalValidateAndPolish = RunnableLambda.from(
+    async (candidate: Candidate) => {
+        const finalDraft = {
+            answer: candidate.answer,
+            source: candidate.source ?? [],
+        };
+
+        const parsed1 = searchOutputSchema.safeParse(finalDraft);
+
+        if (parsed1.success) {
+            return { ...parsed1.data, mode: candidate.mode };
         }
 
-        const parsed1=searchOutputSchema.safeParse(finalDraft);
+        // one-shot repair if the output is not in the correct format
+        const repaired = await repairSearch(finalDraft);
 
-        if(parsed1.success){
-            return parsed1.data;
+        const parsed2 = searchOutputSchema.safeParse({
+            answer: repaired.answer,
+            source: repaired.source,
+        });
+
+        if (parsed2.success) {
+            return { ...parsed2.data, mode: candidate.mode };
         }
 
-        //one shot repair if the output is not in the correct format ( extra check )
-        const repaired= await repairSearch(finalDraft);
-
-        const parsed2 = searchOutputSchema.safeParse(finalDraft);
-
-        if(parsed2.success){
-            return parsed2.data;
-        }
+        // last resort: return draft as-is with mode
+        return { ...finalDraft, mode: candidate.mode };
     }
-)
+);
 
-async function repairSearch(obj:any): Promise<{answer:string, sources:string[]}>{
+async function repairSearch(obj: { answer: string; source: string[] }): Promise<{ answer: string; source: string[] }> {
     const model=getModel({temperature:0.2});
 
     const res= await model.invoke(
@@ -40,13 +46,13 @@ async function repairSearch(obj:any): Promise<{answer:string, sources:string[]}>
                 [
                     "You fix JSON objects to match the required format",
                     "Respond only with valid json object",
-                    "Schema :{ answer: string , sources : string[] ( url as strings )}"
+                    "Schema :{ answer: string , source : string[] ( url as strings )}"
                 ].join("\n")
             ),
 
             new HumanMessage(
                  [
-                    'Make this exactly as the schema and ensure that sources is always an array of strings',
+                    'Make this exactly as the schema and ensure that source is always an array of URL strings',
                     "Input JSON :",
                     JSON.stringify(obj)
                  ].join("\n")
@@ -58,10 +64,16 @@ async function repairSearch(obj:any): Promise<{answer:string, sources:string[]}>
 
     const json=extractJSON(text);
 
+    const sourceList = Array.isArray(json.source)
+        ? json.source
+        : Array.isArray(json.sources)
+          ? json.sources
+          : [];
+
     return {
-        answer : String(json.answer ?? "").trim(),
-        sources : Array.isArray(json.sources) ? json.sources.map(String) : []
-    }
+        answer: String(json.answer ?? obj.answer ?? "").trim(),
+        source: sourceList.map(String),
+    };
 }
 
 function extractJSON(text:string){
