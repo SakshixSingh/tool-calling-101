@@ -45,7 +45,7 @@ export default function Home() {
         headers:{
           'Content-Type':'application/json'
         },
-        body:JSON.stringify({query:prompt})
+        body: JSON.stringify({ q: prompt }),
         
       })
       const json= await result.json();
@@ -58,10 +58,20 @@ export default function Home() {
         setChat((old) => [...old, { role: "assistant", content: data.answer, sources: data.source, time: timeDiff }])
       }
      
-    }catch(error){
-      const timeDiff = Math.round(performance.now()-oldTime);
-      const msg="Request failed."
-      setChat((old)=>[...old,{role:'assistant',content : 'I tried to answer but something went wrong', sources : [], time : timeDiff, error : msg}]);
+    } catch (error) {
+      const timeDiff = Math.round(performance.now() - oldTime)
+      const msg =
+        error instanceof Error ? error.message : "Request failed."
+      setChat((old) => [
+        ...old,
+        {
+          role: "assistant",
+          content: "I tried to answer but something went wrong",
+          sources: [],
+          time: timeDiff,
+          error: msg,
+        },
+      ])
     }finally{
       setLoading(false);
     }
